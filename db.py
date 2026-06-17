@@ -6,18 +6,13 @@ from huggingface_hub import login
 import os
 import shutil
 from sentence_transformers import SentenceTransformer
-
-# 1. Retrieve your fresh token safely from your environment variables
-HF_TOKEN = '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'
+HF_TOKEN = os.getenv("HF_TOKEN")
 login(HF_TOKEN)
-
 db_path = "./chroma_langchain_db"
 
 if os.path.exists(db_path):
     shutil.rmtree(db_path)
     print("Deleted existing Chroma DB!")
-
-# Path to your PDF folder
 pdf_folder = r"./PDF"
 
 # Collect all PDFs inside the folder
