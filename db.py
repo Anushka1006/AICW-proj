@@ -6,8 +6,19 @@ from huggingface_hub import login
 import os
 import shutil
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
+from pypdf import PdfReader
+
+# Load environment variables from .env file
+load_dotenv()
+
+#from langchain_core.chat_history import BaseChatMessageHistory
+#from langchain_community.chat_message_histories import ChatMessageHistory
+#from langchain_core.runnables.history import RunnableWithMessageHistory
+
 HF_TOKEN = os.getenv("HF_TOKEN")
-login(HF_TOKEN)
+if HF_TOKEN:
+    login(HF_TOKEN)
 db_path = "./chroma_langchain_db"
 
 if os.path.exists(db_path):
