@@ -9,3 +9,9 @@ huggingface_hub
 pypdf
 python-dotenv
 pymupdf
+streamlit
+groq
+
+unstructured[local-inference]
+
+pymupdf

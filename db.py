@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 load_dotenv()
 
@@ -19,10 +20,27 @@ pdf_files = [os.path.join(pdf_folder, f) for f in os.listdir(pdf_folder) if f.lo
 
 documents = []
 for pdf_path in pdf_files:
-    loader = PyPDFLoader(pdf_path)
-    docs = loader.load()
+    fast_loader = PyPDFLoader(pdf_path)
+    docs = fast_loader.load()
+
+    total_text_length = sum(len(doc.page_content.strip()) for doc in docs)
+
+    # FUnstructured OCR if the fast extraction yields no real text
+    if total_text_length < 50:
+        print(f"Scanned PDF detected ({pdf_path}). Running Unstructured OCR...")
+        ocr_loader = UnstructuredPDFLoader(
+            pdf_path, 
+            strategy="hi_res"  
+        )
+        docs = ocr_loader.load()
+    else:
+        print(f"Digital PDF detected ({pdf_path}). Processing with PyPDFLoader...")
+
+
+
     for doc in docs:
         doc.page_content = f"title: none | text: {doc.page_content}"
+        
     documents.extend(docs)
     print(f"Loaded: {pdf_path}")
 
@@ -31,8 +49,10 @@ print("All PDFs LOADED!")
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 chunks = text_splitter.split_documents(documents)
 print("DOCUMENT SPLITTED")
+
+# Use API instead of local loading to prevent RAM crashes
 embeddings = HuggingFaceEndpointEmbeddings(
-    repo_id="google/embeddinggemma-300m",
+    model="google/embeddinggemma-300m",
     huggingfacehub_api_token=HF_TOKEN
 )
 print("Gemma API EMBEDDINGS INITIALIZED")
