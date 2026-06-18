@@ -6,8 +6,8 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_community.document_loaders import UnstructuredPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 load_dotenv()
+
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 db_path = "./chroma_langchain_db"

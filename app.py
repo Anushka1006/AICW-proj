@@ -22,6 +22,8 @@ os.makedirs(PDF_FOLDER, exist_ok=True)
 
 #UI 
 st.set_page_config(page_title="AI Document Hub", layout="wide")
+st.title("PDF Chatbot")
+st.sidebar.header("Operations")
 st.title("Multi-Functional PDF AI Tool")
 st.sidebar.header("Settings & Operations")
 
@@ -245,4 +247,5 @@ elif operation == "Keyword Highlighter":
                         st.download_button(label="Download Highlighted PDF", data=f, file_name=out_name, mime="application/pdf")
                 else:
                     doc.close()
+                    st.error("Keyword not found in this PDF.")
                     st.error("Keyword not found in this PDF.")
