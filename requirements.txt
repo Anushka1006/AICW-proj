@@ -8,4 +8,7 @@ sentence-transformers
 huggingface_hub
 pypdf
 python-dotenv
+
+unstructured[local-inference]
+
 pymupdf
