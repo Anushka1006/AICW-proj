@@ -12,7 +12,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 login(HF_TOKEN)
 
 embeddings = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-small-en-v1.5"
+    model_name="google/embeddinggemma-300m"
 )
 
 vector_store = Chroma(
