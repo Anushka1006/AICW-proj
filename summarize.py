@@ -5,9 +5,10 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
-PDF_PATH = "./PDF/Nature.pdf"
+pdf_folder = r"./PDF"
 
 print("\n========== SUMMARY TOOL ==========")
 print("1. Short Summary\n2. Detailed Summary\n3. Chapter-wise Summary")
@@ -21,29 +22,28 @@ elif choice == "3":
     prompt_template = "Organize the following text into a clear, chapter-wise/section summary with main topics and points:\n\n{text}"
 else:
     print("Invalid choice."); exit()
+if not os.path.exists(pdf_folder):
+    print(f"Error: Folder not found at {pdf_folder}"); exit()
 
-print("\nLoading and splitting PDF...")
-if not os.path.exists(PDF_PATH):
-    print(f"Error: File not found at {PDF_PATH}"); exit()
+pdf_files = [f for f in os.listdir(pdf_folder) if f.lower().endswith(".pdf")]
+if not pdf_files:
+    print(f"No PDF files found in {pdf_folder}."); exit()
 
-loader = PyPDFLoader(PDF_PATH)
-chunks = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300).split_documents(loader.load())
-
-# Initialize LLM using your .env API_KEY configuration
-llm = ChatGroq(
-    temperature=0, 
-    model_name="llama-3.1-8b-instant", 
-    groq_api_key=API_KEY
-)
-
-# Build custom pipeline using LCEL instead of load_summarize_chain
+llm = ChatGroq(temperature=0, model_name="llama-3.1-8b-instant", groq_api_key=API_KEY)
 prompt = PromptTemplate.from_template(prompt_template)
 chain = prompt | llm | StrOutputParser()
-
-print(f"Generating summary via Groq from {len(chunks)} chunks...")
-
-# Combine chunk contents to form a comprehensive input context
-full_text = "\n\n".join([doc.page_content for doc in chunks])
-summary_output = chain.invoke({"text": full_text})
-
-print(f"\n{'='*60}\nSUMMARY OUTPUT\n{'='*60}\n{summary_output}\n{'='*60}")
+for pdf_file in pdf_files:
+    full_path = os.path.join(pdf_folder, pdf_file)
+    print(f"\nLoading and splitting: {pdf_file}...")
+    
+    try:
+        loader = PyPDFLoader(full_path)
+        chunks = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300).split_documents(loader.load())
+        
+        full_text = "\n\n".join([doc.page_content for doc in chunks])
+        print(f"Generating summary via Groq from {len(chunks)} chunks...")
+        summary_output = chain.invoke({"text": full_text})
+        
+        print(f"\n{'='*60}\nSUMMARY OUTPUT FOR: {pdf_file}\n{'='*60}\n{summary_output}\n{'='*60}")
+    except Exception as e:
+        print(f"Error processing {pdf_file}: {e}")

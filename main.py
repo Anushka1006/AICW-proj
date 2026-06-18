@@ -11,8 +11,10 @@ API_KEY = os.getenv("API_KEY")
 HF_TOKEN = os.getenv("HF_TOKEN")
 login(HF_TOKEN)
 
-embeddings = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-small-en-v1.5"
+
+embeddings = HuggingFaceEndpointEmbeddings(
+    repo_id="google/embeddinggemma-300m",
+    huggingfacehub_api_token=HF_TOKEN
 )
 
 vector_store = Chroma(
